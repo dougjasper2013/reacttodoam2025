@@ -1,23 +1,42 @@
-import logo from './logo.svg';
+// import logo from './logo.svg';
+import React, { useState } from 'react';
 import './App.css';
+import TodoBanner from './TodoBanner';
 
 function App() {
+  const [userName, setUserName] = useState("Doug");
+
+  const [todoItems] = useState([
+    { action: "Buy Flowers", done: false },
+    { action: "Get Shoes", done: false },
+    { action: "Collect Tickets", done: true },
+    { action: "Call Joe", done: false }
+  ]);
+
+  //const changeStateData = () => {
+  //  setUserName(prevName => (prevName === "Doug" ? "Bob" : "Doug"));
+  //};
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container mt-3">
+      <TodoBanner userName={userName} todoItems={todoItems} />
+
+      <table className="table table-striped table-bordered">
+        <thead className="table-dark">
+          <tr>
+            <th>Action</th>
+            <th>Done</th>
+          </tr>
+        </thead>
+        <tbody>
+          {todoItems.map((item, index) => (
+            <tr key={index}>
+              <td>{item.action}</td>
+              <td>{item.done ? "Yes" : "No"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
