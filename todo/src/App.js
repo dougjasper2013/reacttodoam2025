@@ -2,9 +2,10 @@
 import React, { useState } from 'react';
 import './App.css';
 import TodoBanner from './TodoBanner';
+import TodoRow from './TodoRow';
 
 function App() {
-  const [userName, setUserName] = useState("Doug");
+  const [userName] = useState("Doug");
 
   const [todoItems] = useState([
     { action: "Buy Flowers", done: false },
@@ -29,11 +30,8 @@ function App() {
           </tr>
         </thead>
         <tbody>
-          {todoItems.map((item, index) => (
-            <tr key={index}>
-              <td>{item.action}</td>
-              <td>{item.done ? "Yes" : "No"}</td>
-            </tr>
+          {todoItems.map((item, index) => (            
+            <TodoRow item={item} />
           ))}
         </tbody>
       </table>
