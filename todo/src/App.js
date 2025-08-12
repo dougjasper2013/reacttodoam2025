@@ -36,9 +36,18 @@ function App() {
      localStorage.setItem("todos", JSON.stringify(updatedTodos));
   };
 
-  const todoTableRows = (doneValue) => todoItems.filter(item => item.done === doneValue).map(item =>
-    <TodoRow key={ item.action } item={ item } toggle={ toggleTodo } />
-  )
+  const deleteTodo = (todo) => {
+    if (todo.done) {
+      const updatedTodos = todoItems.filter(item => item.action !== todo.action);
+      setTodoItems(updatedTodos);
+      localStorage.setItem("todos", JSON.stringify(updatedTodos));
+    }
+  };
+
+
+  // const todoTableRows = (doneValue) => todoItems.filter(item => item.done === doneValue).map(item =>
+  //   <TodoRow key={ item.action } item={ item } toggle={ toggleTodo } />
+  // )
 
   useEffect(() => {
     try {
@@ -73,7 +82,7 @@ function App() {
       <div className="m-3">
         <TodoCreator callback={createNewTodo} />
       </div>
-
+      
       <table className="table table-striped table-bordered">
         <thead className="table-dark">
           <tr>
@@ -82,7 +91,14 @@ function App() {
           </tr>
         </thead>
         <tbody>
-          { todoTableRows(false) }
+          {todoItems.filter(item => !item.done).map(item => (
+            <TodoRow
+              key={item.action}
+              item={item}
+              toggle={toggleTodo}
+              // no deleteTodo prop passed here
+            />
+          ))}
         </tbody>
       </table>
 
@@ -93,19 +109,27 @@ function App() {
             callback={(checked) => setShowCompleted(checked)} />
         </div>
 
-        { showCompleted &&
+        {showCompleted && (
         <table className="table table-striped table-bordered">
           <thead>
             <tr>
-              <th style={{width: "75%"}} >Description</th>
-              <th style={{width: "25%"}}>Done</th>
+              <th style={{ width: "60%" }}>Description</th>
+              <th style={{ width: "20%" }}>Done</th>
+              <th style={{ width: "20%" }}>Actions</th> {/* Delete button */}
             </tr>
           </thead>
           <tbody>
-            { todoTableRows(true) }
+            {todoItems.filter(item => item.done).map(item => (
+              <TodoRow
+                key={item.action}
+                item={item}
+                toggle={toggleTodo}
+                deleteTodo={deleteTodo} // only passed here
+              />
+            ))}
           </tbody>
         </table>
-        }
+      )}
 
     </div>
   );
