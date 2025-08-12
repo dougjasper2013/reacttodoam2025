@@ -1,7 +1,11 @@
 import React from 'react';
 
-function TodoRow({item})
-{    
+function TodoRow({item, toggle})
+{
+
+    const onToggle = () => {
+        toggle(item);
+    };
 
     return (
         <tr>
@@ -11,7 +15,8 @@ function TodoRow({item})
             <td>
                 <input
                     type="checkbox"
-                    checked={ item.done }                    
+                    checked={ item.done }
+                    onChange={ onToggle }
                     />
             </td>
         </tr>
