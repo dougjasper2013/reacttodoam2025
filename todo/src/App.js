@@ -44,6 +44,18 @@ function App() {
     }
   };
 
+  const editTodo = (oldItem, newAction) => {
+    setTodoItems(
+      todoItems.map(item =>
+        item.action === oldItem.action ? { ...item, action: newAction } : item
+      )
+    );
+  };
+
+  const clearCompleted = () => {
+    setTodoItems(todoItems.filter(item => !item.done));
+  };
+
 
   // const todoTableRows = (doneValue) => todoItems.filter(item => item.done === doneValue).map(item =>
   //   <TodoRow key={ item.action } item={ item } toggle={ toggleTodo } />
@@ -88,6 +100,7 @@ function App() {
           <tr>
             <th>Action</th>
             <th>Done</th>
+            <th>Actions</th> {/* For edit button */}
           </tr>
         </thead>
         <tbody>
@@ -96,7 +109,7 @@ function App() {
               key={item.action}
               item={item}
               toggle={toggleTodo}
-              // no deleteTodo prop passed here
+              editTodo={editTodo} // only passed for incomplete
             />
           ))}
         </tbody>
@@ -129,6 +142,17 @@ function App() {
             ))}
           </tbody>
         </table>
+      )}
+
+      {todoItems.some(item => item.done) && (
+        <div className="text-center mt-3">
+          <button
+            className="btn btn-danger"
+            onClick={clearCompleted}
+          >
+            Clear All Completed
+          </button>
+        </div>
       )}
 
     </div>
