@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-function TodoRow({ item, toggle, deleteTodo, editTodo }) {
+function TodoRow({ item, toggle, deleteCallback, editCallback }) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editedText, setEditedText] = useState(item.action);
+  const [editText, setEditText] = useState(item.action);
 
-  const onToggle = () => toggle(item);
-  const onDelete = () => deleteTodo && deleteTodo(item);
-  const onSave = () => {
-    editTodo(item, editedText);
+  const handleToggle = () => {
+    toggle(item);
+  };
+
+  const handleEditSave = () => {
+    if (editText.trim() !== "" && editCallback) {
+      editCallback(item, editText.trim());
+    }
     setIsEditing(false);
+  };
+
+  const handleDelete = () => {
+    if (deleteCallback) {
+      deleteCallback(item);
+    }
   };
 
   return (
@@ -17,41 +27,35 @@ function TodoRow({ item, toggle, deleteTodo, editTodo }) {
         {isEditing ? (
           <input
             type="text"
-            value={editedText}
-            onChange={(e) => setEditedText(e.target.value)}
+            className="form-control"
+            value={editText}
+            onChange={(e) => setEditText(e.target.value)}
           />
         ) : (
           item.action
         )}
       </td>
       <td>
-        <input type="checkbox" checked={item.done} onChange={onToggle} />
+        <input type="checkbox" checked={item.done} onChange={handleToggle} />
       </td>
       <td>
-        {/* Edit button only for incomplete todos */}
-        {editTodo && !isEditing && (
-          <button
-            className="btn btn-sm btn-warning me-1"
-            onClick={() => setIsEditing(true)}
-          >
-            Edit
-          </button>
+        {!item.done && (
+          <>
+            {isEditing ? (
+              <button className="btn btn-success btn-sm" onClick={handleEditSave}>
+                Save
+              </button>
+            ) : (
+              <button className="btn btn-warning btn-sm" onClick={() => setIsEditing(true)}>
+                Edit
+              </button>
+            )}
+          </>
         )}
-        {isEditing && (
-          <button
-            className="btn btn-sm btn-success me-1"
-            onClick={onSave}
-          >
-            Save
-          </button>
-        )}
-
-        {/* Delete button only for completed todos */}
-        {deleteTodo && (
-          <button
-            className="btn btn-sm btn-danger"
-            onClick={onDelete}
-          >
+      </td>
+      <td>
+        {item.done && deleteCallback && (
+          <button className="btn btn-danger btn-sm" onClick={handleDelete}>
             Delete
           </button>
         )}

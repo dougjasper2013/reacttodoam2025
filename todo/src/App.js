@@ -1,91 +1,74 @@
-// import logo from './logo.svg';
-import React, { useState, useEffect } from 'react';
-import './App.css';
-import TodoBanner from './TodoBanner';
-import TodoRow from './TodoRow';
-import TodoCreator from './TodoCreator';
-import VisibilityControl from './VisibilityControl';
+import React, { useState, useEffect } from "react";
+import "./App.css";
+import TodoBanner from "./TodoBanner";
+import TodoCreator from "./TodoCreator";
+import TodoRow from "./TodoRow";
+import VisibilityControl from "./VisibilityControl";
 
 function App() {
   const [userName] = useState("Doug");
 
-  const [todoItems, setTodoItems] = useState([
-    { action: "Buy Flowers", done: false },
-    { action: "Get Shoes", done: false },
-    { action: "Collect Tickets", done: true },
-    { action: "Call Joe", done: false }
-  ]);
+  const [todoItems, setTodoItems] = useState(() => {
+    const saved = localStorage.getItem("todos");
+    return saved
+      ? JSON.parse(saved)
+      : [
+          { action: "Buy Flowers", done: false },
+          { action: "Get Shoes", done: false },
+          { action: "Collect Tickets", done: true },
+          { action: "Call Joe", done: false },
+        ];
+  });
 
   const [showCompleted, setShowCompleted] = useState(true);
 
+  // Persist to localStorage whenever todoItems change
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todoItems));
+  }, [todoItems]);
+
   const createNewTodo = (task) => {
-    if (!todoItems.find(item => item.action === task)) {
-      const updatedTodos = [...todoItems, {action: task, done: false}];
+    if (!todoItems.find((item) => item.action === task)) {
       setTodoItems([...todoItems, { action: task, done: false }]);
-      localStorage.setItem("todos", JSON.stringify(updatedTodos));
     }
   };
 
   const toggleTodo = (todo) => {
-    const updatedTodos = todoItems.map((item) =>    
-      item.action === todo.action
-        ? { ...item, done: !item.done }
-        : item
+    setTodoItems(
+      todoItems.map((item) =>
+        item.action === todo.action ? { ...item, done: !item.done } : item
+      )
     );
-    setTodoItems(updatedTodos);
-     localStorage.setItem("todos", JSON.stringify(updatedTodos));
   };
 
   const deleteTodo = (todo) => {
-    if (todo.done) {
-      const updatedTodos = todoItems.filter(item => item.action !== todo.action);
-      setTodoItems(updatedTodos);
-      localStorage.setItem("todos", JSON.stringify(updatedTodos));
-    }
+    setTodoItems(todoItems.filter((item) => item.action !== todo.action));
   };
 
-  const editTodo = (oldItem, newAction) => {
+  const editTodo = (todo, newAction) => {
     setTodoItems(
-      todoItems.map(item =>
-        item.action === oldItem.action ? { ...item, action: newAction } : item
+      todoItems.map((item) =>
+        item.action === todo.action ? { ...item, action: newAction } : item
       )
     );
   };
 
   const clearCompleted = () => {
-    setTodoItems(todoItems.filter(item => !item.done));
+    setTodoItems(todoItems.filter((item) => !item.done));
   };
 
-
-  // const todoTableRows = (doneValue) => todoItems.filter(item => item.done === doneValue).map(item =>
-  //   <TodoRow key={ item.action } item={ item } toggle={ toggleTodo } />
-  // )
-
-  useEffect(() => {
-    try {
-      const data = localStorage.getItem("todos");
-      if(data)
-      {
-        const parsedData = JSON.parse(data);
-        if(Array.isArray(parsedData)) {
-          setTodoItems(parsedData);
-        }
-      }
-      else
-      {
-        [userName] = "Doug";
-        [todoItems] = [{action: "Buy Flowers", done: false},
-          {action: "Get Shoes", done: false},
-          {action: "Collect Tickets", done: true},
-          {action: "Call Joe", done: false}
-        ];
-        [showCompleted] = true;
-      }
-    }
-    catch(error) {
-      console.error("Failed to load todos:", error);
-    }
-  },[])
+  const todoTableRows = (doneValue) =>
+    todoItems
+      .filter((item) => item.done === doneValue)
+      .map((item, index) => (
+        <TodoRow
+          key={index}
+          item={item}
+          toggle={toggleTodo}
+          deleteCallback={deleteTodo}
+          editCallback={editTodo}
+        />
+      ));
 
   return (
     <div className="container mt-3">
@@ -94,67 +77,46 @@ function App() {
       <div className="m-3">
         <TodoCreator callback={createNewTodo} />
       </div>
-      
+
       <table className="table table-striped table-bordered">
         <thead className="table-dark">
           <tr>
-            <th>Action</th>
+            <th>Description</th>
             <th>Done</th>
-            <th>Actions</th> {/* For edit button */}
+            <th>Edit</th>
+            <th>Delete</th>
           </tr>
         </thead>
-        <tbody>
-          {todoItems.filter(item => !item.done).map(item => (
-            <TodoRow
-              key={item.action}
-              item={item}
-              toggle={toggleTodo}
-              editTodo={editTodo} // only passed for incomplete
-            />
-          ))}
-        </tbody>
+        <tbody>{todoTableRows(false)}</tbody>
       </table>
 
       <div className="bg-secondary text-white text-center p-2">
-          <VisibilityControl
-            description="Completed Tasks"
-            isChecked={showCompleted}
-            callback={(checked) => setShowCompleted(checked)} />
-        </div>
+        <VisibilityControl
+          description="Completed Tasks"
+          isChecked={showCompleted}
+          callback={(checked) => setShowCompleted(checked)}
+        />
+      </div>
 
-        {showCompleted && (
-        <table className="table table-striped table-bordered">
-          <thead>
+      {showCompleted && (
+        <table className="table table-striped table-bordered mt-2">
+          <thead className="table-dark">
             <tr>
-              <th style={{ width: "60%" }}>Description</th>
-              <th style={{ width: "20%" }}>Done</th>
-              <th style={{ width: "20%" }}>Actions</th> {/* Delete button */}
+              <th>Description</th>
+              <th>Done</th>
+              <th>Edit</th>
+              <th>Delete</th>
             </tr>
           </thead>
-          <tbody>
-            {todoItems.filter(item => item.done).map(item => (
-              <TodoRow
-                key={item.action}
-                item={item}
-                toggle={toggleTodo}
-                deleteTodo={deleteTodo} // only passed here
-              />
-            ))}
-          </tbody>
+          <tbody>{todoTableRows(true)}</tbody>
         </table>
       )}
 
-      {todoItems.some(item => item.done) && (
-        <div className="text-center mt-3">
-          <button
-            className="btn btn-danger"
-            onClick={clearCompleted}
-          >
-            Clear All Completed
-          </button>
-        </div>
-      )}
-
+      <div className="text-center mt-3">
+        <button className="btn btn-danger" onClick={clearCompleted}>
+          Clear Completed
+        </button>
+      </div>
     </div>
   );
 }
